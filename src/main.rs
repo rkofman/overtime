@@ -1,4 +1,4 @@
-mod foo;
+mod timeclock;
 fn main() {
-    println!("Hello, world! Adding: {}", foo::add(2, 2));
+    println!("Hello, world! Adding: {}", timeclock::add(2, 2));
 }
