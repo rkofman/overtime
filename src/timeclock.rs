@@ -2,21 +2,13 @@
 //     println!("Hello, world!");
 // }
 
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+use chrono_tz::Tz;
+use chrono::DateTime;
+
+pub fn minutes_delta(start: DateTime<Tz>, end: DateTime<Tz>) -> i64 {
+    (end - start).num_minutes()
 }
+
 
 #[cfg(test)]
 mod tests;
-// mod tests {
-//   // fn test_foo_implementation() {}
-    
-//   use super::*;
-
-//   #[test]
-//   fn it_works() {
-//       let result = add(2, 2);
-//       assert_eq!(result, 4);
-//   }
-
-// }
