@@ -1,3 +1,4 @@
+mod foo;
 fn main() {
-    println!("Hello, world!");
+    println!("Hello, world! Adding: {}", foo::add(2, 2));
 }
