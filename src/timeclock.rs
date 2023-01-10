@@ -1,7 +1,3 @@
-// fn foo_implementation() {
-//     println!("Hello, world!");
-// }
-
 use chrono_tz::Tz;
 use chrono::DateTime;
 
