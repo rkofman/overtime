@@ -1,12 +1,12 @@
 use std::fmt;
 
-use chrono::DateTime;
+use chrono::{DateTime, Duration};
 use chrono_tz::Tz;
 
-use crate::units::Cents;
+use crate::units::{Cents, Minutes, DecimalMinutes};
 
 #[derive(Debug, Clone)]
-struct TimecardRangeError;
+pub struct TimecardRangeError;
 
 impl fmt::Display for TimecardRangeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -19,22 +19,25 @@ impl fmt::Display for TimecardRangeError {
 pub struct Timecard {
     start: DateTime<Tz>,
     end: DateTime<Tz>,
-    hourly_rate: Cents
+    pub hourly_rate: Cents
 }
 
 impl Timecard {
-    fn new(start: DateTime<Tz>, end: DateTime<Tz>, hourly_rate: Cents) -> Result<Self, TimecardRangeError> {
+    pub fn new(start: DateTime<Tz>, end: DateTime<Tz>, hourly_rate: Cents) -> Result<Self, TimecardRangeError> {
         if start > end {
             return Err(TimecardRangeError);
         }
         Ok(Timecard { start, end, hourly_rate })
     }
 
-    pub fn minutes_worked(self) -> i64 {
-        (self.end - self.start).num_minutes()
+    pub fn minutes_worked(&self) -> Minutes {
+        Minutes((self.end - self.start).num_minutes())
+    }
+
+    pub fn decimal_minutes(&self) -> DecimalMinutes {
+        DecimalMinutes((self.end - self.start).num_seconds() / 36)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -54,7 +57,19 @@ mod tests {
         assert_eq!(tc.start, Pacific.with_ymd_and_hms(2022, 10, 12, 9, 0, 0).unwrap());
         assert_eq!(tc.end, Pacific.with_ymd_and_hms(2022, 10, 12, 10, 30, 0).unwrap());
         assert_eq!(tc.hourly_rate, Cents(2000));
-        assert_eq!(tc.minutes_worked(), 90);
+        assert_eq!(tc.minutes_worked(), Minutes(90));
+    }
+
+    #[test]
+    fn test_decimal_minutes() {
+
+        let tc = Timecard::new(
+            Pacific.with_ymd_and_hms(2022, 10, 12, 9, 0, 0).unwrap(),
+            Pacific.with_ymd_and_hms(2022, 10, 12, 9, 36, 0).unwrap(),
+            Cents(2000)
+        ).unwrap();
+        // 36 minutes is exactly 0.60 of an hour.
+        assert_eq!(tc.decimal_minutes(), DecimalMinutes(60));
     }
 
     #[test]
