@@ -1,8 +1,8 @@
 mod tests {
 
-use chrono::{TimeZone};
-use chrono_tz::US::Pacific;
-use super::super::*;
+  use chrono::{TimeZone};
+  use chrono_tz::US::Pacific;
+  use super::super::*;
     
   #[test]
   fn test_duration() {

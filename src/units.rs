@@ -1,29 +1,15 @@
+// the hourly_rate module may need to be rebranded.
+// and the rest of the units moved into their own modules. perhaps:
+// * Currency
+// * Time
+// * Complex
+pub mod hourly_rate;
+
 #[derive(Debug, PartialEq, Copy, Clone, derive_more::Add)]
 pub struct Minutes(pub i64);
 
 #[derive(Debug, PartialEq, Copy, Clone, derive_more::Add)]
-pub struct DecimalMinutes(pub i64);
-
-impl std::ops::Mul<Cents> for DecimalMinutes {
-    type Output = Cents;
-
-    fn mul(self, rhs: Cents) -> Self::Output {
-        assert_eq!(0, self.0 * rhs.0 % 100);
-        Cents(self.0 * rhs.0 / 100)
-    }
-}
-
-
-#[derive(Debug, PartialEq, Copy, Clone, derive_more::Add)]
 pub struct Cents(pub i64);
-
-impl std::ops::Mul<DecimalMinutes> for Cents {
-    type Output = Cents;
-
-    fn mul(self, rhs: DecimalMinutes) -> Self::Output {
-        rhs * self // delegate to DecimalMinutes * Cents
-    }
-}
 
 #[derive(Debug, PartialEq)]
 pub struct LocalTime {

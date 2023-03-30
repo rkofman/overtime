@@ -1,9 +1,10 @@
 use std::fmt;
 
-use chrono::{DateTime, Duration};
+use chrono::{DateTime};
 use chrono_tz::Tz;
 
-use crate::units::{Cents, Minutes, DecimalMinutes};
+use crate::units::Minutes;
+use crate::units::hourly_rate::HourlyRate;
 
 #[derive(Debug, Clone)]
 pub struct TimecardRangeError;
@@ -19,11 +20,11 @@ impl fmt::Display for TimecardRangeError {
 pub struct Timecard {
     start: DateTime<Tz>,
     end: DateTime<Tz>,
-    pub hourly_rate: Cents
+    pub hourly_rate: HourlyRate
 }
 
 impl Timecard {
-    pub fn new(start: DateTime<Tz>, end: DateTime<Tz>, hourly_rate: Cents) -> Result<Self, TimecardRangeError> {
+    pub fn new(start: DateTime<Tz>, end: DateTime<Tz>, hourly_rate: HourlyRate) -> Result<Self, TimecardRangeError> {
         if start > end {
             return Err(TimecardRangeError);
         }
@@ -32,10 +33,6 @@ impl Timecard {
 
     pub fn minutes_worked(&self) -> Minutes {
         Minutes((self.end - self.start).num_minutes())
-    }
-
-    pub fn decimal_minutes(&self) -> DecimalMinutes {
-        DecimalMinutes((self.end - self.start).num_seconds() / 36)
     }
 }
 
@@ -52,24 +49,12 @@ mod tests {
         let tc = Timecard::new(
             Pacific.with_ymd_and_hms(2022, 10, 12, 9, 0, 0).unwrap(),
             Pacific.with_ymd_and_hms(2022, 10, 12, 10, 30, 0).unwrap(),
-            Cents(2000)
+            HourlyRate::from_cents_per_hour(2000)
         ).unwrap();
         assert_eq!(tc.start, Pacific.with_ymd_and_hms(2022, 10, 12, 9, 0, 0).unwrap());
         assert_eq!(tc.end, Pacific.with_ymd_and_hms(2022, 10, 12, 10, 30, 0).unwrap());
-        assert_eq!(tc.hourly_rate, Cents(2000));
+        assert_eq!(tc.hourly_rate, HourlyRate::from_cents_per_hour(2000));
         assert_eq!(tc.minutes_worked(), Minutes(90));
-    }
-
-    #[test]
-    fn test_decimal_minutes() {
-
-        let tc = Timecard::new(
-            Pacific.with_ymd_and_hms(2022, 10, 12, 9, 0, 0).unwrap(),
-            Pacific.with_ymd_and_hms(2022, 10, 12, 9, 36, 0).unwrap(),
-            Cents(2000)
-        ).unwrap();
-        // 36 minutes is exactly 0.60 of an hour.
-        assert_eq!(tc.decimal_minutes(), DecimalMinutes(60));
     }
 
     #[test]
@@ -78,7 +63,7 @@ mod tests {
         let tc_result = Timecard::new(
             Pacific.with_ymd_and_hms(2022, 10, 12, 9, 0, 0).unwrap(),
             Pacific.with_ymd_and_hms(2022, 10, 12, 8, 30, 0).unwrap(),
-            Cents(2000)
+            HourlyRate::from_cents_per_hour(2000)
         );
         assert!(tc_result.is_err());
     }
