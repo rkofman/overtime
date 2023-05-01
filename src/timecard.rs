@@ -4,7 +4,7 @@ use chrono::{DateTime};
 use chrono_tz::Tz;
 
 use crate::units::Minutes;
-use crate::units::hourly_rate::HourlyRate;
+use crate::units::hourly_rate::HourlyWage;
 
 #[derive(Debug, Clone)]
 pub struct TimecardRangeError;
@@ -20,11 +20,11 @@ impl fmt::Display for TimecardRangeError {
 pub struct Timecard {
     start: DateTime<Tz>,
     end: DateTime<Tz>,
-    pub hourly_rate: HourlyRate
+    pub hourly_rate: HourlyWage
 }
 
 impl Timecard {
-    pub fn new(start: DateTime<Tz>, end: DateTime<Tz>, hourly_rate: HourlyRate) -> Result<Self, TimecardRangeError> {
+    pub fn new(start: DateTime<Tz>, end: DateTime<Tz>, hourly_rate: HourlyWage) -> Result<Self, TimecardRangeError> {
         if start > end {
             return Err(TimecardRangeError);
         }
@@ -49,11 +49,11 @@ mod tests {
         let tc = Timecard::new(
             Pacific.with_ymd_and_hms(2022, 10, 12, 9, 0, 0).unwrap(),
             Pacific.with_ymd_and_hms(2022, 10, 12, 10, 30, 0).unwrap(),
-            HourlyRate::from_cents_per_hour(2000)
+            HourlyWage::from_cents_per_hour(2000)
         ).unwrap();
         assert_eq!(tc.start, Pacific.with_ymd_and_hms(2022, 10, 12, 9, 0, 0).unwrap());
         assert_eq!(tc.end, Pacific.with_ymd_and_hms(2022, 10, 12, 10, 30, 0).unwrap());
-        assert_eq!(tc.hourly_rate, HourlyRate::from_cents_per_hour(2000));
+        assert_eq!(tc.hourly_rate, HourlyWage::from_cents_per_hour(2000));
         assert_eq!(tc.minutes_worked(), Minutes(90));
     }
 
@@ -63,7 +63,7 @@ mod tests {
         let tc_result = Timecard::new(
             Pacific.with_ymd_and_hms(2022, 10, 12, 9, 0, 0).unwrap(),
             Pacific.with_ymd_and_hms(2022, 10, 12, 8, 30, 0).unwrap(),
-            HourlyRate::from_cents_per_hour(2000)
+            HourlyWage::from_cents_per_hour(2000)
         );
         assert!(tc_result.is_err());
     }

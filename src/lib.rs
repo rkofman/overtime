@@ -28,25 +28,9 @@ mod tests {
     use chrono::{DateTime, Weekday, TimeZone, Days, Datelike, Duration};
     use chrono_tz::{US::Pacific, Tz};
 
-    use crate::units::{LocalTime, Cents, Minutes, hourly_rate::HourlyRate};
+    use crate::units::{LocalTime, Cents, Minutes, hourly_rate::HourlyWage};
 
     use super::*;
-
-    fn datetime_for(weekday: Weekday, time: &str) -> DateTime<Tz> {
-        let sunday_noon = Pacific.with_ymd_and_hms(2022, 10, 9, 0, 0, 0).unwrap();
-        assert_eq!(sunday_noon.weekday(), Weekday::Sun);
-
-        // TODO(rkofman): there has *got* to be a cleaner way of doing this. :shrug:
-        let weekdays_starting_sunday = [
-            Weekday::Sun, Weekday::Mon, Weekday::Tue, Weekday::Wed, Weekday::Thu, Weekday::Fri, Weekday::Sat
-        ];
-        let num_days = weekdays_starting_sunday.into_iter().position(|day| day == weekday).unwrap();
-        let mut time_split = time.split(":");
-        let num_hours = time_split.next().unwrap().parse::<i64>().unwrap();
-        let num_minutes = time_split.next().unwrap().parse::<i64>().unwrap();
-
-        sunday_noon + Days::new(num_days.try_into().unwrap()) + Duration::hours(num_hours) + Duration::minutes(num_minutes)
-    }
 
     #[test]
     fn calculate_basic_wages() {
@@ -56,7 +40,7 @@ mod tests {
             business_week_cutoff: Weekday::Sun
         };
 
-        let twenty_dollars_per_hour = HourlyRate::from_cents_per_hour(2000);
+        let twenty_dollars_per_hour = HourlyWage::from_cents_per_hour(2000);
 
         let timecards = Vec::from([
             Timecard::new(
@@ -78,6 +62,23 @@ mod tests {
         assert_eq!(expected_wages.overtime_wages, result_wages.overtime_wages);
         assert_eq!(expected_wages, result_wages);
     }
+
+    fn datetime_for(weekday: Weekday, time: &str) -> DateTime<Tz> {
+        let sunday_noon = Pacific.with_ymd_and_hms(2022, 10, 9, 0, 0, 0).unwrap();
+        assert_eq!(sunday_noon.weekday(), Weekday::Sun);
+
+        // TODO(rkofman): there has *got* to be a cleaner way of doing this. :shrug:
+        let weekdays_starting_sunday = [
+            Weekday::Sun, Weekday::Mon, Weekday::Tue, Weekday::Wed, Weekday::Thu, Weekday::Fri, Weekday::Sat
+        ];
+        let num_days = weekdays_starting_sunday.into_iter().position(|day| day == weekday).unwrap();
+        let mut time_split = time.split(":");
+        let num_hours = time_split.next().unwrap().parse::<i64>().unwrap();
+        let num_minutes = time_split.next().unwrap().parse::<i64>().unwrap();
+
+        sunday_noon + Days::new(num_days.try_into().unwrap()) + Duration::hours(num_hours) + Duration::minutes(num_minutes)
+    }
+
 }
 
 /* other tests to try: */
